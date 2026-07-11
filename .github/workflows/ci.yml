@@ -20,7 +20,11 @@ jobs:
           xcodebuild -version
           xcrun simctl list devices available | grep iPhone
 
+      - name: Locate project
+        run: find . -name "*.xcodeproj"
+
       - name: Build and Test
+        working-directory: Stream-iOS
         run: |
           set -o pipefail
           xcodebuild test \
