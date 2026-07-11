@@ -29,6 +29,6 @@ jobs:
           set -o pipefail
           xcodebuild test \
             -scheme Stream-iOS \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
             -enableCodeCoverage YES \
             CODE_SIGNING_ALLOWED=NO
