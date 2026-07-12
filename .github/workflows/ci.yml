@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show environment
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available | grep iPhone
+
+      - name: Locate project
+        run: find . -name "*.xcodeproj"
+
+      - name: Build and Test
+        working-directory: Stream-iOS
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme Stream-iOS \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -enableCodeCoverage YES \
+            CODE_SIGNING_ALLOWED=NO
