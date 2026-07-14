@@ -1,7 +1,7 @@
 # Stream-iOS
 
 ![CI](https://github.com/UllashPodder/Stream-iOS/actions/workflows/ci.yml/badge.svg)
-![Swift](https://img.shields.io/badge/Swift-5.10-orange)
+![Swift](https://img.shields.io/badge/Swift-6-orange)
 ![Platform](https://img.shields.io/badge/iOS-17%2B-blue)
 ![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
 
