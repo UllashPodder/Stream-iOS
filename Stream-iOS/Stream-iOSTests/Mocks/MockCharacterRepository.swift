@@ -9,7 +9,7 @@
 @testable import Stream_iOS
 
 final class MockCharacterRepository: CharacterRepository, @unchecked Sendable {
-    var result: Result<PagedResponse<CharacterDTO>, Error>
+    var result: Result<PagedResponse<CharacterDTO>, Error> = .failure(APIError.invalidResponse)
     private(set) var requestedPages: [Int] = []
 
     func fetchCharacters(page: Int) async throws -> PagedResponse<CharacterDTO> {
