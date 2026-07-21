@@ -14,6 +14,7 @@ final class MockCharacterRepository: CharacterRepository, @unchecked Sendable {
 
     func fetchCharacters(page: Int) async throws -> PagedResponse<CharacterDTO> {
         requestedPages.append(page)
+        try await Task.sleep(for: .milliseconds(50))
         return try result.get()
     }
 }

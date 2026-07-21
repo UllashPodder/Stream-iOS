@@ -40,5 +40,63 @@ struct CharacterDecodingTests {
 
         #expect(dto.status == .unknown)
     }
+    func decodedFixturePage() throws -> PagedResponse<CharacterDTO> {
+        let data = try Fixture.load("character_page1")
+        let response = try JSONDecoder().decode(PagedResponse<CharacterDTO>.self, from: data)
+        return response
+    }
+//    when several calls to loadNextPageIfNeeded() overlap in time, exactly one fetch reaches the repository.
+    @MainActor @Test func loadsFirstPageAndPopulatesCharacters() async throws{
+//        arrange
+        let mockRepository = MockCharacterRepository()
+        mockRepository.result = .success( try decodedFixturePage())
+        let sut = CharacterListViewModel(repository: mockRepository)
+//        act
+        await sut.loadNextPageIfNeeded()
+//        assert
+        #expect(sut.state == .loaded)
+        #expect(sut.characters.count == 20)
+        #expect(mockRepository.requestedPages == [1])
+    }
+    @MainActor @Test func loadsSecondPageAndAppends() async throws{
+//        arrange
+        let mockRepository = MockCharacterRepository()
+        mockRepository.result = .success( try decodedFixturePage())
+        let sut = CharacterListViewModel(repository: mockRepository)
+//        act
+        await sut.loadNextPageIfNeeded()
+//        second call
+        await sut.loadNextPageIfNeeded()
+//        assert
+        #expect(sut.state == .loaded)
+        #expect(sut.characters.count == 40)
+        #expect(mockRepository.requestedPages == [1,2])
+    }
+    @MainActor @Test func concurrentLoadsRequestPageOnlyOnce() async throws{
+//        arrange
+        let mockRepository = MockCharacterRepository()
+        mockRepository.result = .success( try decodedFixturePage())
+        let sut = CharacterListViewModel(repository: mockRepository)
+//        act
+        await withTaskGroup (of:Void.self) { group in
+            for _ in 0..<3 {
+                group.addTask { await sut.loadNextPageIfNeeded() }
+            }
+        }
+//        assert
+        #expect(sut.state == .loaded)
+        #expect(sut.characters.count == 20)
+        #expect(mockRepository.requestedPages == [1])
+    }
+    @MainActor @Test func failedLoadSetsErrorStateAndKeepsCharactersEmpty() async throws {
+        let mockRepository = MockCharacterRepository()
+        mockRepository.result = .failure(APIError.httpStatus(500))
+        let sut = CharacterListViewModel(repository: mockRepository)
+
+        await sut.loadNextPageIfNeeded()
+
+        #expect(sut.characters.isEmpty)
+        // assert state is .error
+    }
 }
 
